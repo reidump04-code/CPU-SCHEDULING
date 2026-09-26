@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0f15">
+  <title>CPU Scheduling Simulator & Performance Analyzer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="brand-mark"><span></span><span></span><span></span></span><div><h1>CPU Scheduling Simulator</h1><p>Operating Systems Midterm Project</p></div></div>
+  <div class="header-actions"><button id="loadSample" class="btn secondary">Load Sample</button><button id="clearAll" class="btn ghost">Clear</button></div>
+</header>
+
+<main class="container">
+  <section class="hero card">
+    <div class="hero-top">
+      <div><h2>Simulate scheduling. Visualize execution. Explain the results.</h2><p>Enter processes, run the required CPU scheduling algorithms, inspect the Gantt timeline and compare waiting, turnaround, and response times.</p></div>
+      <div class="hero-metrics"><div><b id="processCount">0</b><span>Processes</span></div><div><b>5</b><span>Algorithms</span></div><div><b id="lastRun">—</b><span>Last run</span></div></div>
+    </div>
+  </section>
+
+  <section class="grid two">
+    <div class="card">
+      <div class="section-title"><div><span class="step">01</span><div><h3>Process Input</h3><p>Arrival time, CPU burst, and priority</p></div></div><button id="addProcess" class="btn primary">+ Add Process</button></div>
+      <div class="table-wrap"><table id="processTable"><thead><tr><th>Process</th><th>Arrival Time</th><th>Burst Time</th><th>Priority</th><th></th></tr></thead><tbody></tbody></table></div>
+      <div class="hint">Priority rule: <strong>smaller number = higher priority</strong>. Tie-breaking: earlier arrival time, then process input order.</div>
+    </div>
+
+    <div class="card controls">
+      <div class="section-title"><div><span class="step">02</span><div><h3>Simulation Controls</h3><p>Choose the algorithm and settings</p></div></div></div>
+      <label>Scheduling algorithm<select id="algorithm"><option value="FCFS">FCFS — First-Come, First-Served</option><option value="SJF">SJF — Shortest Job First</option><option value="SRTF">SRTF — Shortest Remaining Time First</option><option value="RR">RR — Round Robin</option><option value="PNP">Priority — Non-Preemptive</option><option value="PP">Priority — Preemptive (Bonus)</option></select></label>
+      <label id="quantumWrap">Round Robin time quantum<input id="quantum" type="number" min="1" step="1" value="2"></label>
+      <button id="runBtn" class="btn primary full">▶ Run Simulation</button>
+      <div class="checklist"><span>✓ Arrival times</span><span>✓ CPU idle periods</span><span>✓ Preemption</span><span>✓ Multiple RR cycles</span><span>✓ Equal values</span></div>
+    </div>
+  </section>
+
+  <section id="resultsSection" class="hidden">
+    <div class="card results-head"><div><span class="step">03</span><div><h3 id="resultTitle">Results</h3><p id="resultSubtitle">Execution timeline and calculated metrics</p></div></div><div class="badge" id="resultBadge">READY</div></div>
+    <div class="card">
+      <div class="subhead"><h3>Gantt Chart</h3><span class="muted">Process execution order · start → end</span></div>
+      <div id="gantt" class="gantt"></div>
+    </div>
+    <div class="card">
+      <div class="subhead"><h3>Process Metrics</h3><span class="muted">CT = Completion · TAT = Turnaround · WT = Waiting · RT = Response</span></div>
+      <div class="table-wrap"><table id="metricsTable"><thead><tr><th>Process</th><th>AT</th><th>BT</th><th>Priority</th><th>CT</th><th>TAT</th><th>WT</th><th>RT</th></tr></thead><tbody></tbody></table></div>
+      <div id="averages" class="averages"></div>
+    </div>
+    <div class="card explanation"><div class="subhead"><h3>Interpretation</h3><span class="muted">Use this to explain why the schedule looks this way</span></div><div id="explanationText"></div></div>
+  </section>
+
+  <section class="card">
+    <div class="section-title"><div><span class="step">04</span><div><h3>Algorithm Comparison</h3><p>Run all five required algorithms on the same workload</p></div></div><button id="compareBtn" class="btn primary">Compare All</button></div>
+    <div class="table-wrap"><table id="comparisonTable"><thead><tr><th>Algorithm</th><th>Avg. Waiting Time</th><th>Avg. Turnaround Time</th><th>Avg. Response Time</th></tr></thead><tbody><tr><td colspan="4" class="empty">Run “Compare All” to calculate the comparison.</td></tr></tbody></table></div>
+    <div id="comparisonNotes" class="comparison-notes hidden"></div>
+  </section>
+
+  <section class="grid three">
+    <article class="card mini"><span class="algo">FCFS</span><h3>First-Come, First-Served</h3><p>Non-preemptive. Processes execute in arrival order.</p></article>
+    <article class="card mini"><span class="algo">SJF</span><h3>Shortest Job First</h3><p>Non-preemptive. Chooses the available process with the shortest burst.</p></article>
+    <article class="card mini"><span class="algo">SRTF</span><h3>Shortest Remaining Time First</h3><p>Preemptive SJF. The shortest remaining burst gets the CPU.</p></article>
+    <article class="card mini"><span class="algo">RR</span><h3>Round Robin</h3><p>Preemptive. Each process receives the selected time quantum.</p></article>
+    <article class="card mini"><span class="algo">Priority</span><h3>Priority Scheduling</h3><p>Both non-preemptive and preemptive modes are included. Smaller number means higher priority.</p></article>
+  </section>
+
+  <section class="card documentation">
+    <div class="subhead"><h3>Metric Formulas</h3><span class="muted">Required by the project specification</span></div>
+    <div class="formula-grid"><div><b>Turnaround Time</b><code>TAT = CT − AT</code></div><div><b>Waiting Time</b><code>WT = TAT − BT</code></div><div><b>Response Time</b><code>RT = First CPU Start − AT</code></div><div><b>Average</b><code>Average = Σ metric ÷ number of processes</code></div></div>
+    <div class="note"><strong>Implementation note:</strong> The simulator calculates schedules dynamically from the entered workload; it does not use precomputed answers. CPU idle intervals are represented in the Gantt chart as <em>IDLE</em>.</div>
+  </section>
+</main>
+<footer><span>CPU Scheduling Simulator · GitHub Pages ready</span><span>Built for Operating Systems Midterm Project</span></footer>
+<script src="script.js"></script>
+</body>
+</html>
